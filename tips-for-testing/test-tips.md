@@ -310,7 +310,7 @@ go test -coverprofile=coverage.out && go tool cover -html=coverage.out
 ### 总结
 单元测试是保证代码质量十分重要的一个环节。Go的源码和著名开源库，都是一边写源码一边写单元测试。在选择开源库的时候，测试覆盖率及测试用例的质量可以作为一个重要的指标。
 
-最后在贴下`Dave Cheney`老爷子在推特转发的一些关于测试的哲学，十分有意思且有道理。
+最后在贴下`Dave Cheney`在推特转发的一些关于测试的哲学，十分有意思且有道理。
 
 ![dave-test.png](https://wx-mp-1259374020.file.myqcloud.com/dave-test.png)
 

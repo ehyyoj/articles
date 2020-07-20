@@ -1,5 +1,3 @@
-一年多没更新文章了，这一年发生了很多事情，经历了很多困难挫折，迷茫过，彷徨过，但幸运的是熬过去了，并且在机缘巧合之下去面了个试，去了另一家比较向往的公司。在新公司工作也比以前要更加愉快，充实，机会也更加多了，在新的团队也做过一些技术分享，对自己和读者的收获都是蛮大的，这也是我重新开始写文章的原因。
-
 ### 前言
 测试驱动开发是一个写出高质量代码的好方法，同时避免将代码越写越烂，并证明你的代码能实现预期的效果。
 
@@ -46,9 +44,9 @@ func TestAdd(t *testing.T) {
 
 
 ### 利用interface写出可测试代码
-现在假设我们正在实现一个叫`external`的web操作公共库，这个库提供了`Client`对象和`GetData`方法，用于从web服务中取数据，代码如下：
+现在假设我们正在实现一个叫`web`的web操作公共库，这个库提供了`Client`对象和`GetData`方法，用于从web服务中取数据，代码如下：
 ```go
-package external
+package web
 
 type Client struct{}
 
@@ -61,24 +59,24 @@ func (c Client) GetData() (string, error) {
 }
 ```
 
-接着我们的`foo`包会引用`external`包的`Client`对象`GetData`方法去web服务中取数据，代码如下：
+接着我们的`foo`包会引用`web`包的`Client`对象`GetData`方法去web服务中取数据，代码如下：
 ```go
 package foo
 
 import (
 	"errors"
 
-	"interfaces/external"
+	"interfaces/web"
 )
 
 func Controller() error {
-	externalClient := external.NewClient()
-	fromExternalAPI, err := externalClient.GetData()
+	webClient := web.NewClient()
+	fromWebAPI, err := webClient.GetData()
 	if err != nil {
 		return err
 	}
-	// do some things based on data from external API
-	if fromExternalAPI != "data" {
+	// do some things based on data from web API
+	if fromWebAPI != "data" {
 		return errors.New("unexpected data")
 	}
 	return nil
@@ -87,7 +85,7 @@ func Controller() error {
 
 现在我们需要测试Controller方法并分别写了两个测试方法，一个是测试成功获取到数据，另一个是测试两种获取数据失败的情况。
 
-然后，问题来了。我们似乎没有办法同时测试到这些逻辑分支，因为我们没办法改变`external`包里面的逻辑。
+然后，问题来了。我们似乎没有办法同时测试到这些逻辑分支，因为我们没办法改变`web`包里面的逻辑。
 ```go
 package foo_test
 
@@ -114,7 +112,7 @@ func TestController_Failure(t *testing.T) {
 }
 ```
 
-到这里似乎把我们难住了，但如果我们将`external`包中的`Client`定义成interface，那我们就可以很容易的替换掉这个`Client`的实现。例如，改成下面这样：
+到这里似乎把我们难住了，但如果我们将`web`包中的`Client`定义成interface，那我们就可以很容易的替换掉这个`Client`的实现。例如，改成下面这样：
 ```go
 package foo
 
@@ -122,17 +120,17 @@ import (
 	"errors"
 )
 
-type IExternalClient interface {
+type IWebClient interface {
 	GetData() (string, error)
 }
 
-func Controller(externalClient IExternalClient) error {
-	fromExternalAPI, err := externalClient.GetData()
+func Controller(webClient IWebClient) error {
+	fromWebAPI, err := webClient.GetData()
 	if err != nil {
 		return err
 	}
-	// do some things based on data from external API
-	if fromExternalAPI != "data" {
+	// do some things based on data from web API
+	if fromWebAPI != "data" {
 		return errors.New("unexpected data")
 	}
 	return nil
